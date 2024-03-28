@@ -1,5 +1,6 @@
 import discord
 
+
 class GuildIDs:
     """The unique Server IDs."""
 

@@ -3,19 +3,20 @@ import os
 import pyjson5
 from discord.ext import commands
 
+
 class Bot(commands.Bot):
-    
-    def __init__(self, command_prefix = "!"):
+
+    def __init__(self, command_prefix="!"):
         super().__init__(
             command_prefix=command_prefix,
             intents=discord.Intents.all(),
-            status=discord.Status.online
+            status=discord.Status.online,
         )
 
         self.curDir = os.path.dirname(__file__)
 
     async def on_ready(self):
-        print(f'{self.user} has connected to Discord!')
+        print(f"{self.user} has connected to Discord!")
 
     async def setup_hook(self):
         for filename in os.listdir(os.path.join(self.curDir, "cogs")):
@@ -23,7 +24,7 @@ class Bot(commands.Bot):
                 try:
                     await self.load_extension(f"cogs.{filename[0:-3]}")
                 except Exception as e:
-                    raise(e)
+                    raise (e)
                 else:
                     print(f"{filename} loaded")
 
@@ -38,6 +39,7 @@ def main():
     bot = Bot(command_prefix=pub["command_prefix"])
 
     bot.run(priv["token"])
+
 
 if __name__ == "__main__":
     main()

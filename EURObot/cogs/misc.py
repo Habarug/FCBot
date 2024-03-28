@@ -1,5 +1,6 @@
 from discord.ext import commands
 
+
 class Misc(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
@@ -12,6 +13,7 @@ class Misc(commands.Cog):
     @commands.command()
     async def echo(self, ctx: commands.Context):
         await ctx.channel.send(ctx.message.content)
+
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))
