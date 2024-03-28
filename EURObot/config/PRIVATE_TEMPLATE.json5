@@ -1,0 +1,4 @@
+{ //add your info and rename to PRIVATE.json5
+    token:              "YOUR DISCORD APP TOKEN", //discord token thingy
+    footballData:       "YOUR FOOTBALL DATA API KEY" //https://www.football-data.org
+}
