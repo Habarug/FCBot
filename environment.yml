@@ -72,6 +72,7 @@ dependencies:
 - openjpeg=2.5.2=h9f1df11_0
 - openssl=3.2.1=h0d3ecfb_1
 - packaging=24.0=pyhd8ed1ab_0
+- pandas=2.2.1=py312h88edd18_0
 - parso=0.8.3=pyhd8ed1ab_0
 - pathspec=0.12.1=pyhd8ed1ab_0
 - pexpect=4.9.0=pyhd8ed1ab_0
@@ -89,7 +90,9 @@ dependencies:
 - pysocks=1.7.1=pyha2e5f31_6
 - python=3.12.2=hdf0ec26_0_cpython
 - python-dateutil=2.9.0=pyhd8ed1ab_0
+- python-tzdata=2024.1=pyhd8ed1ab_0
 - python_abi=3.12=4_cp312
+- pytz=2024.1=pyhd8ed1ab_0
 - pyzmq=25.1.2=py312h1edf716_0
 - readline=8.2=h92ec313_1
 - requests=2.31.0=pyhd8ed1ab_0
