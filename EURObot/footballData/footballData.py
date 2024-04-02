@@ -103,7 +103,12 @@ class FootballData:
 
             self.matches[competition]["date"] = pd.to_datetime(
                 self.matches[competition]["utcDate"]
-            )
+            ).dt.date
+
+            self.matches[competition]["time"] = pd.to_datetime(
+                self.matches[competition]["utcDate"]
+            ).dt.time
+
             self.matches[competition] = self.matches[competition].drop(
                 columns=["utcDate"]
             )

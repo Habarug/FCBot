@@ -1,3 +1,4 @@
+import logging
 import os
 
 import discord
@@ -5,8 +6,6 @@ import pandas as pd
 import pyjson5
 from discord.ext import commands
 from footballData import footballData
-
-import logging
 
 
 class Bot(commands.Bot):
