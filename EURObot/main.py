@@ -4,7 +4,7 @@ import discord
 import pandas as pd
 import pyjson5
 from discord.ext import commands
-from footballData import FootballData
+from footballData import footballData
 
 
 class Bot(commands.Bot):
@@ -44,7 +44,7 @@ class Bot(commands.Bot):
 
     def setup_FD(self, FD_API_key):
         print("Setting up Football Data API access")
-        self.FD = FootballData(FD_API_key)
+        self.FD = footballData.FootballData(FD_API_key)
 
         if not os.path.exists(os.path.join(self.curDir, "files")):
             os.mkdir(os.path.join(self.curDir, "files"))
@@ -56,7 +56,7 @@ class Bot(commands.Bot):
             )
         else:
             self.competitions_df = pd.read_csv(
-                self.curDir, os.path.join("files", "competitions.csv")
+                os.path.join(self.curDir, "files", "competitions.csv")
             )
 
         try:
