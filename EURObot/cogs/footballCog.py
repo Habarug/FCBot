@@ -53,7 +53,7 @@ class FootballCog(commands.Cog):
     async def update_matches(self):
         self.matches = self.FD.get_matches(self.competition, self.season)
 
-    @commands.command()
+    @commands.hybrid_command()
     async def upcoming(self, ctx: commands.Context):
         matchday = self.matches[self.matches["utcDate"].dt.date > dt.now().date()]
         msg = "Upcoming matchday: \n"
