@@ -1,10 +1,10 @@
+import os
 from datetime import datetime as dt
 
-from discord.ext import commands, tasks
-
-import os
-from footballData import footballData
 import pandas as pd
+from discord.ext import commands, tasks
+from discord.utils import format_dt
+from footballData import footballData
 
 
 class FootballCog(commands.Cog):
@@ -55,11 +55,13 @@ class FootballCog(commands.Cog):
 
     @commands.command()
     async def upcoming(self, ctx: commands.Context):
-        matchday = self.matches[self.matches["date"] > dt.now().date()]
-        msg = f"Upcoming matches {matchday["date"].iloc[0].strftime("%d %B %Y")}: \n"
+        matchday = self.matches[self.matches["utcDate"].dt.date > dt.now().date()]
+        msg = "Upcoming matchday: \n"
 
-        for idm, match in matchday[matchday["date"] == matchday["date"].iloc[0]].iterrows():
-            msg += f"\n{match["time"]}: {match["homeTeam"]} - {match["awayTeam"]}"
+        for idm, match in matchday[
+            matchday["utcDate"].dt.date == matchday["utcDate"].dt.date.iloc[0]
+        ].iterrows():
+            msg += f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
 
         await ctx.channel.send(msg)
 
