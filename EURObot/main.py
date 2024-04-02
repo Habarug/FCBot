@@ -27,8 +27,6 @@ class Bot(commands.Bot):
         self.competition = competition
         self.season = season
 
-        print(self.curDir)
-
         self.setup_FD(FD_API_key)
 
     async def on_ready(self):

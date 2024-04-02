@@ -12,13 +12,14 @@ import requests
 class FootballData:
 
     url_base = "https://api.football-data.org/v4/"
-    t_min = 60  # minimum minutes between same API call
+    t_min = 15  # minimum minutes between same API call
 
     def __init__(self, KEY):
         self.header = {"X-Auth-Token": KEY}
 
         self.competitions_time = dt.min
-        self.EURO_time = dt.min
+        self.matches = dict()
+        self.matches_time = dict()
 
     def get_competitions(self):
         """Returns all available competitions as a Pandas Dataframe"""
@@ -46,23 +47,69 @@ class FootballData:
 
         return self.competitions
 
-    def get_EURO_matches(self, year=2024):
+    def get_matches(self, competition, season):
+        cols = [
+            "homeTeam",
+            "awayTeam",
+            "winner",
+            "homeGoals",
+            "awayGoals",
+            "status",
+            "utcDate",
+            "stage",
+            "group",
+        ]
+
+        if competition not in self.matches:
+            self.matches_time[competition] = dt.min
+
         time = dt.now()
 
-        if ((time - self.EURO_time).total_seconds() / 60) > self.t_min:
+        if ((time - self.matches_time[competition]).total_seconds() / 60) > self.t_min:
             try:
                 response = requests.get(
-                    self.url_base + "competitions/EC/matches?season=" + str(year),
+                    self.url_base
+                    + f"competitions/{competition}/matches?season={str(season)}",
                     headers=self.header,
                 )
             except Exception as e:
                 raise e
             else:
-                self.data_raw = response.json()
-                self.EURO_matches = self.data_raw["matches"]
-                self.EURO_time = time
+                data_raw = response.json()
+                matches_raw = data_raw["matches"]
 
-        return self.EURO_matches
+            self.matches[competition] = pd.DataFrame(columns=cols)
+
+            for match in matches_raw:
+                row = []
+                for col in cols:
+                    if col == "winner":
+                        val = match["score"]["winner"]
+                    elif col == "homeGoals":
+                        val = match["score"]["fullTime"]["home"]
+                    elif col == "awayGoals":
+                        val = match["score"]["fullTime"]["away"]
+                    else:
+                        val = match[col]
+
+                        if isinstance(val, dict):
+                            val = val["name"]
+
+                    row.append(val)
+
+                self.matches[competition].loc[
+                    len(self.matches[competition].index)
+                ] = row
+
+            self.matches[competition]["date"] = pd.to_datetime(
+                self.matches[competition]["utcDate"]
+            )
+            self.matches[competition] = self.matches[competition].drop(
+                columns=["utcDate"]
+            )
+            self.matches_time[competition] = dt.now()
+
+        return self.matches[competition]
 
 
 def main():
