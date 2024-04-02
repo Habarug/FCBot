@@ -1,3 +1,4 @@
 *.ipynb
 *__pycache__
 *PRIVATE.json5
+*competitions.csv

@@ -1,4 +1,3 @@
-import difflib
 import os
 from datetime import datetime as dt
 from datetime import timedelta as timedelta
@@ -21,7 +20,8 @@ class FootballData:
         self.competitions_time = dt.min
         self.EURO_time = dt.min
 
-    def get_competitions_list(self):
+    def get_competitions(self):
+        """Returns all available competitions as a Pandas Dataframe"""
         time = dt.now()
         if ((time - self.competitions_time).total_seconds() / 60) > self.t_min:
             try:
@@ -34,9 +34,16 @@ class FootballData:
                 self.competitions_raw = response.json()
                 self.competitions_time = time
 
-            self.competitions = []
+            cols = ["name", "code", "emblem", "type", "numberOfAvailableSeasons"]
+            self.competitions = pd.DataFrame(columns=cols)
+
             for comp in self.competitions_raw["competitions"]:
-                self.competitions.append(comp["name"])
+                row = []
+                for col in cols:
+                    row.append(comp[col])
+
+                self.competitions.loc[len(self.competitions.index)] = row
+
         return self.competitions
 
     def get_EURO_matches(self, year=2024):
