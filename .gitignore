@@ -3,3 +3,5 @@
 *PRIVATE.json5
 *competitions.csv
 */logs
+venv_discord
+.DS_Store

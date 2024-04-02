@@ -5,7 +5,6 @@ import discord
 import pandas as pd
 import pyjson5
 from discord.ext import commands
-from footballData import footballData
 
 
 class Bot(commands.Bot):
@@ -27,9 +26,9 @@ class Bot(commands.Bot):
 
         self.competition = competition
         self.season = season
+        self.FD_API_key = FD_API_key
 
         self.setup_logger()
-        self.setup_FD(FD_API_key)
 
     async def on_ready(self):
         print(f"{self.user} has connected to Discord!")
@@ -53,34 +52,6 @@ class Bot(commands.Bot):
             encoding="utf-8",
             mode="w",
         )
-
-    def setup_FD(self, FD_API_key):
-        print("Setting up Football Data API access")
-        self.FD = footballData.FootballData(FD_API_key)
-
-        if not os.path.exists(os.path.join(self.curDir, "files")):
-            os.mkdir(os.path.join(self.curDir, "files"))
-
-        if not os.path.exists(os.path.join(self.curDir, "files", "competitions.csv")):
-            self.competitions_df = self.FD.get_competitions()
-            self.competitions_df.to_csv(
-                os.path.join(self.curDir, "files", "competitions.csv")
-            )
-        else:
-            self.competitions_df = pd.read_csv(
-                os.path.join(self.curDir, "files", "competitions.csv")
-            )
-
-        try:
-            self.competition_name = self.competitions_df[
-                self.competitions_df["code"] == self.competition
-            ]["name"]
-        except:
-            raise ValueError(f"Competition code {self.competition} not recognised")
-        else:
-            print(
-                f"Football data ready. Current competition: {self.competition_name} {self.season}"
-            )
 
 
 def main():
