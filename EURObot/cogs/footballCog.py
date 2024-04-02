@@ -5,6 +5,7 @@ import pandas as pd
 from discord.ext import commands, tasks
 from discord.utils import format_dt
 from footballData import footballData
+import discord
 
 
 class FootballCog(commands.Cog):
@@ -49,21 +50,49 @@ class FootballCog(commands.Cog):
                 f"Football data ready. Current competition: {self.competition_name} {self.season}"
             )
 
+    def get_next_matchday(self):
+        matchday = self.matches[
+            self.matches["utcDate"].dt.date > dt.now().date()
+        ]  # only show upcoming matches
+        return matchday[
+            matchday["utcDate"].dt.date == matchday["utcDate"].dt.date.iloc[0]
+        ]  # only show next day
+
+    def format_match(self, match):
+        return f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
+
     @tasks.loop(minutes=60)  # update matches every X minute
     async def update_matches(self):
         self.matches = self.FD.get_matches(self.competition, self.season)
 
     @commands.hybrid_command()
     async def upcoming(self, ctx: commands.Context):
-        matchday = self.matches[self.matches["utcDate"].dt.date > dt.now().date()]
+        matchday = self.get_next_matchday()
         msg = "Upcoming matchday: \n"
 
-        for idm, match in matchday[
-            matchday["utcDate"].dt.date == matchday["utcDate"].dt.date.iloc[0]
-        ].iterrows():
-            msg += f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
+        for stage in matchday["stage"]:
+            matchday_stage = matchday[matchday["stage"] == stage]
+            for group in matchday_stage["group"]:
+                msg += f"\n{stage} - {group}:".replace("_", " ")
+                for idm, match in matchday_stage[
+                    matchday_stage["group"] == group
+                ].iterrows():
+                    msg += self.format_match(match)
 
         await ctx.channel.send(msg)
+
+    @commands.hybrid_command()
+    async def predict_upcoming(self, ctx: commands.Context):
+        self.predict_match(self.matches.iloc[0])
+
+    async def predict_match(self, match):
+        pass
+
+    class PredictMatch(discord.ui.View):
+
+        def __init__(self):
+
+            self.add_item(discord.ui.TextInput())
 
 
 async def setup(bot):
