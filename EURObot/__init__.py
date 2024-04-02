@@ -1,2 +1,2 @@
-from .main import Bot
 from .footballData import footballData
+from .main import Bot

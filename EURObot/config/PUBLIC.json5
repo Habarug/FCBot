@@ -1,3 +1,21 @@
 {
-    command_prefix : "!"
+    command_prefix :    "!",
+    
+    // Codes for different competitions:
+    // Campeonato Brasileiro Série A = BSA
+    // Championship = ELC
+    // Premier League = PL
+    // UEFA Champions League = CL
+    // European Championship = EC
+    // Ligue 1 = FL1
+    // Bundesliga = BL1
+    // Serie A = SA
+    // Eredivisie = DED
+    // Primeira Liga = PPL
+    // Copa Libertadores = CLI
+    // Primera Division = PD
+    // FIFA World Cup = WC
+
+    competition:        "EC",
+    season:             2024
 }

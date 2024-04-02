@@ -1,9 +1,11 @@
+import difflib
+import os
 from datetime import datetime as dt
 from datetime import timedelta as timedelta
-import difflib
-import requests
-import os
+
+import pandas as pd
 import pyjson5
+import requests
 
 # Resources for football-data API https://docs.football-data.org/general/v4/resources.html
 
