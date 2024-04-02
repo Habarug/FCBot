@@ -6,6 +6,8 @@ import pyjson5
 from discord.ext import commands
 from footballData import footballData
 
+import logging
+
 
 class Bot(commands.Bot):
 
@@ -27,6 +29,7 @@ class Bot(commands.Bot):
         self.competition = competition
         self.season = season
 
+        self.setup_logger()
         self.setup_FD(FD_API_key)
 
     async def on_ready(self):
@@ -41,6 +44,16 @@ class Bot(commands.Bot):
                     raise (e)
                 else:
                     print(f"{filename} loaded")
+
+    def setup_logger(self):
+        if not os.path.exists(os.path.join(self.curDir, "logs")):
+            os.mkdir(os.path.join(self.curDir, "logs"))
+
+        self.handler = logging.FileHandler(
+            filename=os.path.join(self.curDir, "logs", "discord.log"),
+            encoding="utf-8",
+            mode="w",
+        )
 
     def setup_FD(self, FD_API_key):
         print("Setting up Football Data API access")
@@ -85,7 +98,7 @@ def main():
         command_prefix=pub["command_prefix"],
     )
 
-    bot.run(priv["token"])
+    bot.run(priv["token"], log_handler=bot.handler)
 
 
 if __name__ == "__main__":
