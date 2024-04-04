@@ -8,7 +8,6 @@ from discord.ext import commands
 
 
 class Bot(commands.Bot):
-
     def __init__(
         self,
         FD_API_key,

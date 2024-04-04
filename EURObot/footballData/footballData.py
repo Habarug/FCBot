@@ -10,7 +10,6 @@ import requests
 
 
 class FootballData:
-
     url_base = "https://api.football-data.org/v4/"
     t_min = 15  # minimum minutes between same API call
 
@@ -97,9 +96,9 @@ class FootballData:
 
                     row.append(val)
 
-                self.matches[competition].loc[
-                    len(self.matches[competition].index)
-                ] = row
+                self.matches[competition].loc[len(self.matches[competition].index)] = (
+                    row
+                )
 
             self.matches[competition]["utcDate"] = pd.to_datetime(
                 self.matches[competition]["utcDate"]
