@@ -9,11 +9,11 @@ class Misc(commands.Cog):
 
     @commands.hybrid_command()
     async def talk(self, ctx: commands.Context):
-        await ctx.channel.send("AMOGUS")
+        await ctx.csend("AMOGUS")
 
     @commands.hybrid_command()
     async def echo(self, ctx: commands.Context):
-        await ctx.channel.send(ctx.message.content)
+        await ctx.send(ctx.message.content)
 
     @commands.command()
     @app_commands.default_permissions(administrator=True)

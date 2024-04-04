@@ -79,7 +79,7 @@ class FootballCog(commands.Cog):
                 ].iterrows():
                     msg += self.format_match(match)
 
-        await ctx.channel.send(msg)
+        await ctx.send(msg)
 
     @commands.hybrid_command()
     async def predict_upcoming(self, ctx: commands.Context):
