@@ -9,7 +9,6 @@ import discord
 
 
 class FootballCog(commands.Cog):
-
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -61,6 +60,9 @@ class FootballCog(commands.Cog):
     def format_match(self, match):
         return f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
 
+    def format_match_score(self, match, goals):
+        return f"{match["homeTeam"]} {view.goals[match["homeTeam"]]}-{view.goals[match["awayTeam"]]} {match["awayTeam"]}"
+
     @tasks.loop(minutes=60)  # update matches every X minute
     async def update_matches(self):
         self.matches = self.FD.get_matches(self.competition, self.season)
@@ -83,16 +85,42 @@ class FootballCog(commands.Cog):
 
     @commands.hybrid_command()
     async def predict_upcoming(self, ctx: commands.Context):
-        self.predict_match(self.matches.iloc[0])
+        await self.predict_match(ctx, self.matches.iloc[0])  # Placeholder lol
 
-    async def predict_match(self, match):
-        pass
+    async def predict_match(self, ctx: commands.Context, match):
+        view = PredictMatch(match)
+        timed_out = await view.wait()
 
-    class PredictMatch(discord.ui.View):
+        if timed_out:
+            await ctx.send("You did not enter a prediction")
+            return
 
-        def __init__(self):
+        ctx.send(self.format_match_score(match, view.goals))
 
-            self.add_item(discord.ui.TextInput())
+
+class GoalDropdown(discord.ui.Select):
+    def __init__(self, team: str):
+        self.team = team
+        options = [(discord.SelectOption(label=str(i))) for i in range(4)]
+
+        super().__init__(
+            placeholder=f"Goals for {team}:",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        self.goals[self.team] = self.values[0]
+        self.view.stop()
+
+
+class PredictMatch(discord.ui.View):
+    def __init__(self, match: pd.DataFrame):
+        super().__init__(timeout=60)
+        self.goals = {}
+        self.add_item(GoalDropdown(match["homeTeam"]))
+        self.add_item(GoalDropdown(match["awayTeam"]))
 
 
 async def setup(bot):
