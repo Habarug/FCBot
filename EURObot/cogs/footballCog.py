@@ -60,7 +60,7 @@ class FootballCog(commands.Cog):
     def format_match(self, match):
         return f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
 
-    def format_match_score(self, match, goals):
+    def format_match_score(self, match : pd.Series, goals : dict):
         return f"{match["homeTeam"]} {view.goals[match["homeTeam"]]}-{view.goals[match["awayTeam"]]} {match["awayTeam"]}"
 
     @tasks.loop(minutes=60)  # update matches every X minute
@@ -87,7 +87,7 @@ class FootballCog(commands.Cog):
     async def predict_upcoming(self, ctx: commands.Context):
         await self.predict_match(ctx, self.matches.iloc[0])  # Placeholder lol
 
-    async def predict_match(self, ctx: commands.Context, match):
+    async def predict_match(self, ctx: commands.Context, match : pd.Series):
         view = PredictMatch(match)
         timed_out = await view.wait()
 
@@ -116,7 +116,7 @@ class GoalDropdown(discord.ui.Select):
 
 
 class PredictMatch(discord.ui.View):
-    def __init__(self, match: pd.DataFrame):
+    def __init__(self, match: pd.Series):
         super().__init__(timeout=60)
         self.goals = {}
         self.add_item(GoalDropdown(match["homeTeam"]))
