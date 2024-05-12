@@ -42,7 +42,7 @@ class FootballCog(commands.Cog):
             self.competition_name = self.competitions_df[
                 self.competitions_df["code"] == self.competition
             ]["name"]
-        except:
+        except Exception:
             raise ValueError(f"Competition code {self.competition} not recognised")
         else:
             print(
