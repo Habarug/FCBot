@@ -83,6 +83,7 @@ class FootballCog(commands.Cog):
         )
 
         await ctx.send(format_matchday(matchday), view=view)
+        await view.wait()
 
         if view.values[0]:
             await self.display_matchday(ctx, matchday_idx - 1)
@@ -136,6 +137,7 @@ class CustomButton(discord.ui.Button):
         await interaction.response.defer()
         self.view.values[self.idx] = 1
         self.view.stop()
+        a = self.values
 
 
 class UpcomingMatchesButtons(discord.ui.View):
