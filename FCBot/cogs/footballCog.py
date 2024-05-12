@@ -70,7 +70,7 @@ class FootballCog(commands.Cog):
         """Get match day
 
         Args:
-            idx : Index of matchday. Default = 0 : Next matchday
+            idx : Index of matchday.
         """
         return self.matches[self.matches["utcDate"].dt.date == self.matchdays[idx]]
 
@@ -83,6 +83,17 @@ class FootballCog(commands.Cog):
         )
 
         await ctx.send(format_matchday(matchday), view=view)
+
+        timed_out = await view.wait()
+
+        if timed_out:
+            await ctx.send("Timed out")
+            return
+
+        if view.values[0]:
+            await self.display_matchday(ctx, matchday_idx - 1)
+        elif view.values[1]:
+            await self.display_matchday(ctx, matchday_idx + 1)
 
     @commands.hybrid_command()
     async def upcoming(self, ctx: commands.Context):
@@ -122,13 +133,29 @@ class FootballCog(commands.Cog):
 ####################################
 
 
+class CustomButton(discord.ui.Button):
+    def __init__(self, idx, **kwargs):
+        super().__init__(**kwargs)
+        self.idx = idx
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        self.view.values[self.idx] = 1
+        self.view.stop()
+
+
 class UpcomingMatchesButtons(discord.ui.View):
     def __init__(self, show_prev=True, show_next=True):
-        super().__init__(timeout=60)
+        super().__init__()
+
+        self.values = [0, 0]  # 1 for pressed buttons
+
         self.add_item(
-            discord.ui.Button(label="Previous matchday", disabled=not show_prev)
+            CustomButton(idx=0, label="Previous matchday", disabled=not show_prev)
         )
-        self.add_item(discord.ui.Button(label="Next matchday", disabled=not show_next))
+        self.add_item(
+            CustomButton(idx=1, label="Next matchday", disabled=not show_next)
+        )
 
 
 ####################################
