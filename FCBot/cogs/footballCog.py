@@ -137,7 +137,6 @@ class CustomButton(discord.ui.Button):
         await interaction.response.defer()
         self.view.values[self.idx] = 1
         self.view.stop()
-        a = self.values
 
 
 class UpcomingMatchesButtons(discord.ui.View):
@@ -202,7 +201,7 @@ def format_match_score(match: pd.Series, goals: dict):
 
 
 def format_matchday(matchday):
-    msg = f"Upcoming matchday: {format_dt(matchday["utcDate"].iloc[0], style = "D")}\n"
+    msg = f"Matchday: {format_dt(matchday["utcDate"].iloc[0], style = "D")}\n"
 
     for stage in matchday["stage"].unique():
         matchday_stage = matchday[matchday["stage"] == stage]
