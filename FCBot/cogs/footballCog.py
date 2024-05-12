@@ -71,7 +71,7 @@ class FootballCog(commands.Cog):
     async def upcoming(self, ctx: commands.Context):
         """Show upcoming match day"""
         matchday = self.get_matchday(idx=0)
-        msg = "Upcoming matchday: \n"
+        msg = f"Upcoming matchday: {format_dt(matchday["utcDate"].iloc[0], style = "D")}\n"
 
         for stage in matchday["stage"]:
             matchday_stage = matchday[matchday["stage"] == stage]
@@ -150,7 +150,7 @@ class PredictMatch(discord.ui.View):
 
 
 def format_match(match):
-    return f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
+    return f"\n{format_dt(match["utcDate"], style = "t")}: {match["homeTeam"]} - {match["awayTeam"]}"
 
 
 def format_match_score(match: pd.Series, goals: dict):
