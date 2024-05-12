@@ -3,6 +3,6 @@
 *PRIVATE.json5
 *competitions.csv
 */logs
-venv_discord
+.venv
 .DS_Store
 *tempCodeRunnerFile.py
