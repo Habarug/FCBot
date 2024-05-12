@@ -53,6 +53,14 @@ class FootballCog(commands.Cog):
     async def update_matches(self):
         """Loop to update matches"""
         self.matches = self.FD.get_matches(self.competition, self.season)
+        self.matchdays = self.matches["utcDate"].dt.date.unique()
+
+    def get_index_of_next_matchday(self):
+        return [
+            idm
+            for idm, matchday in enumerate(self.matchdays)
+            if matchday >= dt.now().date()
+        ][0]
 
     def get_matchday(self, idx: int = 0):
         """Get match day
@@ -60,12 +68,10 @@ class FootballCog(commands.Cog):
         Args:
             idx : Index of matchday. Default = 0 : Next matchday
         """
-        matchday = self.matches[
-            self.matches["utcDate"].dt.date > dt.now().date()
-        ]  # only show upcoming matches
-        return matchday[
-            matchday["utcDate"].dt.date == matchday["utcDate"].dt.date.iloc[idx]
-        ]  # only show specified matchday
+        return self.matches[
+            self.matches["utcDate"].dt.date
+            == self.matchdays[self.get_index_of_next_matchday() + idx]
+        ]
 
     @commands.hybrid_command()
     async def upcoming(self, ctx: commands.Context):
@@ -76,11 +82,16 @@ class FootballCog(commands.Cog):
         for stage in matchday["stage"]:
             matchday_stage = matchday[matchday["stage"] == stage]
             for group in matchday_stage["group"]:
-                msg += f"\n{stage} - {group}:".replace("_", " ")
-                for idm, match in matchday_stage[
-                    matchday_stage["group"] == group
-                ].iterrows():
-                    msg += format_match(match)
+                if group is not None:
+                    msg += f"\n{stage} - {group}:".replace("_", " ")
+                    for idm, match in matchday_stage[
+                        matchday_stage["group"] == group
+                    ].iterrows():
+                        msg += format_match(match)
+                else:
+                    msg += f"\n{stage}:".replace("_", " ")
+                    for idm, match in matchday_stage.iterrows():
+                        msg += format_match(match)
 
         await ctx.send(msg)
 
