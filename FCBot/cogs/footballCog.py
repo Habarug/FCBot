@@ -49,27 +49,28 @@ class FootballCog(commands.Cog):
                 f"Football data ready. Current competition: {self.competition_name} {self.season}"
             )
 
-    def get_next_matchday(self):
+    @tasks.loop(minutes=60)  # update matches every X minute
+    async def update_matches(self):
+        """Loop to update matches"""
+        self.matches = self.FD.get_matches(self.competition, self.season)
+
+    def get_matchday(self, idx: int = 0):
+        """Get match day
+
+        Args:
+            idx : Index of matchday. Default = 0 : Next matchday
+        """
         matchday = self.matches[
             self.matches["utcDate"].dt.date > dt.now().date()
         ]  # only show upcoming matches
         return matchday[
-            matchday["utcDate"].dt.date == matchday["utcDate"].dt.date.iloc[0]
-        ]  # only show next day
-
-    def format_match(self, match):
-        return f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
-
-    def format_match_score(self, match: pd.Series, goals: dict):
-        return f"{match["homeTeam"]} {goals[match["homeTeam"]]}-{goals[match["awayTeam"]]} {match["awayTeam"]}"
-
-    @tasks.loop(minutes=60)  # update matches every X minute
-    async def update_matches(self):
-        self.matches = self.FD.get_matches(self.competition, self.season)
+            matchday["utcDate"].dt.date == matchday["utcDate"].dt.date.iloc[idx]
+        ]  # only show specified matchday
 
     @commands.hybrid_command()
     async def upcoming(self, ctx: commands.Context):
-        matchday = self.get_next_matchday()
+        """Show upcoming match day"""
+        matchday = self.get_matchday(idx=0)
         msg = "Upcoming matchday: \n"
 
         for stage in matchday["stage"]:
@@ -79,12 +80,16 @@ class FootballCog(commands.Cog):
                 for idm, match in matchday_stage[
                     matchday_stage["group"] == group
                 ].iterrows():
-                    msg += self.format_match(match)
+                    msg += format_match(match)
 
         await ctx.send(msg)
 
+    ########################
+    ### Match prediction ###
+    ########################
+
     @commands.hybrid_command()
-    async def predict_upcoming(self, ctx: commands.Context):
+    async def predict(self, ctx: commands.Context):
         await self.predict_match(ctx, self.matches.iloc[0])  # Placeholder lol
 
     async def predict_match(self, ctx: commands.Context, match: pd.Series):
@@ -98,7 +103,12 @@ class FootballCog(commands.Cog):
             await ctx.send("You did not enter a prediction")
             return
 
-        await ctx.send(self.format_match_score(match, view.goals))
+        await ctx.send(format_match_score(match, view.goals))
+
+
+####################################
+### Match prediction UI elements ###
+####################################
 
 
 class GoalDropdown(discord.ui.Select):
@@ -128,6 +138,19 @@ class PredictMatch(discord.ui.View):
         self.goals = {}
         self.add_item(GoalDropdown(homeTeam))
         self.add_item(GoalDropdown(awayTeam))
+
+
+#########################
+### Utility functions ###
+#########################
+
+
+def format_match(match):
+    return f"\n{format_dt(match["utcDate"], style = "F")}: {match["homeTeam"]} - {match["awayTeam"]}"
+
+
+def format_match_score(match: pd.Series, goals: dict):
+    return f"{match["homeTeam"]} {goals[match["homeTeam"]]}-{goals[match["awayTeam"]]} {match["awayTeam"]}"
 
 
 async def setup(bot):
