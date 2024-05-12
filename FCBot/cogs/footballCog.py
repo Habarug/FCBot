@@ -74,13 +74,22 @@ class FootballCog(commands.Cog):
         """
         return self.matches[self.matches["utcDate"].dt.date == self.matchdays[idx]]
 
+    async def display_matchday(self, ctx: commands.Context, matchday_idx):
+        """Displays a given matchday given by the index and buttons to show previous or next"""
+        matchday = self.get_matchday(idx=matchday_idx)
+
+        view = UpcomingMatchesButtons(
+            show_next=matchday_idx < len(self.matchdays), show_prev=matchday_idx > 0
+        )
+
+        await ctx.send(format_matchday(matchday), view=view)
+
     @commands.hybrid_command()
     async def upcoming(self, ctx: commands.Context):
         """Show upcoming match day"""
-        next_matchday_idx = self.get_index_of_next_matchday()
-        matchday = self.get_matchday(idx=next_matchday_idx)
+        matchday_idx = self.get_index_of_next_matchday()
 
-        await ctx.send(format_matchday(matchday))
+        await self.display_matchday(ctx, matchday_idx)
 
     ########################
     ### Match prediction ###
@@ -106,6 +115,20 @@ class FootballCog(commands.Cog):
             return
 
         await ctx.send(format_match_score(match, view.goals), ephemeral=True)
+
+
+####################################
+### Upcoming matches UI elements ###
+####################################
+
+
+class UpcomingMatchesButtons(discord.ui.View):
+    def __init__(self, show_prev=True, show_next=True):
+        super().__init__(timeout=60)
+        self.add_item(
+            discord.ui.Button(label="Previous matchday", disabled=not show_prev)
+        )
+        self.add_item(discord.ui.Button(label="Next matchday", disabled=not show_next))
 
 
 ####################################
