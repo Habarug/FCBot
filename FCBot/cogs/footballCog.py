@@ -120,7 +120,7 @@ class FootballCog(commands.Cog):
             await ctx.send("You did not enter a prediction", ephemeral=True)
             return
 
-        await ctx.send(format_match_score(match, view.goals), ephemeral=True)
+        await ctx.send(format_match(match, predict=view.goals), ephemeral=True)
 
 
 ####################################
@@ -192,12 +192,28 @@ class PredictMatch(discord.ui.View):
 #########################
 
 
-def format_match(match):
-    return f"\n{format_dt(match["utcDate"], style = "t")}: {match["homeTeam"]} - {match["awayTeam"]}"
+def format_match(match, predict: dict = None):
+    if (
+        match["status"] == "FINISHED"
+    ):  # Display goals for finished or ongoing games. Bold if finished
+        homeGoals = f"**{match["homeGoals"]}**"
+        awayGoals = f"**{match["awayGoals"]}**"
+    elif (
+        match["status"] == "ONGOING"
+    ):  # TODO: Not sure if this is correct, have to check
+        homeGoals = match["homeGoals"]
+        awayGoals = match["awayGoals"]
+    else:  # If not finished or ongoing, don't print score
+        homeGoals = ""
+        awayGoals = ""
 
+    string = f"\n{format_dt(match["utcDate"], style = "t")}: {match["homeTeam"]} {homeGoals}-{awayGoals} {match["awayTeam"]}"
+    if predict:
+        string += (
+            f". Prediction: {predict[match["homeTeam"]]}-{predict[match["awayTeam"]]}"
+        )
 
-def format_match_score(match: pd.Series, goals: dict):
-    return f"{match["homeTeam"]} {goals[match["homeTeam"]]}-{goals[match["awayTeam"]]} {match["awayTeam"]}"
+    return string
 
 
 def format_matchday(matchday):
