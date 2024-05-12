@@ -74,7 +74,7 @@ def main():
         command_prefix=pub["command_prefix"],
     )
 
-    bot.run(priv["token"], log_handler=bot.handler)
+    bot.run(priv["token"], log_handler=bot.handler, log_level=logging.DEBUG)
 
 
 if __name__ == "__main__":
