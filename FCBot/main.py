@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 import discord
 import pyjson5
@@ -20,7 +21,14 @@ class Bot(commands.Bot):
             status=discord.Status.online,
         )
 
+        # Add the path of this file (curDir) to Python path (sys.path)
+        # to ensure relative imports work even if it is run as script
+        # from a different directory.
+        self.workingdir = os.getcwd()
         self.curDir = os.path.dirname(__file__)
+
+        if self.curDir != self.workingdir:
+            sys.path.insert(1, self.curDir)
 
         self.competition = competition
         self.season = season
