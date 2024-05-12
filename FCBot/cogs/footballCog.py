@@ -96,14 +96,18 @@ class FootballCog(commands.Cog):
         homeTeam = match["homeTeam"]
         awayTeam = match["awayTeam"]
         view = PredictMatch(homeTeam, awayTeam)
-        await ctx.send(f"Enter your prediction for {homeTeam}-{awayTeam}", view=view)
+        await ctx.send(
+            f"Enter your prediction for {homeTeam}-{awayTeam}",
+            view=view,
+            ephemeral=True,
+        )
         timed_out = await view.wait()
 
         if timed_out:
-            await ctx.send("You did not enter a prediction")
+            await ctx.send("You did not enter a prediction", ephemeral=True)
             return
 
-        await ctx.send(format_match_score(match, view.goals))
+        await ctx.send(format_match_score(match, view.goals), ephemeral=True)
 
 
 ####################################
