@@ -16,6 +16,6 @@
     // Primera Division = PD
     // FIFA World Cup = WC
 
-    competition:        "EC",
-    season:             2024
+    competition:        "PL",
+    season:             2023
 }
