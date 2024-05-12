@@ -1,11 +1,11 @@
 import os
 from datetime import datetime as dt
 
+import discord
 import pandas as pd
 from discord.ext import commands, tasks
 from discord.utils import format_dt
 from footballData import footballData
-import discord
 
 
 class FootballCog(commands.Cog):
