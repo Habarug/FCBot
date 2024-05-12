@@ -55,6 +55,10 @@ class FootballCog(commands.Cog):
         self.matches = self.FD.get_matches(self.competition, self.season)
         self.matchdays = self.matches["utcDate"].dt.date.unique()
 
+    #########################
+    ### Display matchdays ###
+    #########################
+
     def get_index_of_next_matchday(self):
         return [
             idm
@@ -68,32 +72,15 @@ class FootballCog(commands.Cog):
         Args:
             idx : Index of matchday. Default = 0 : Next matchday
         """
-        return self.matches[
-            self.matches["utcDate"].dt.date
-            == self.matchdays[self.get_index_of_next_matchday() + idx]
-        ]
+        return self.matches[self.matches["utcDate"].dt.date == self.matchdays[idx]]
 
     @commands.hybrid_command()
     async def upcoming(self, ctx: commands.Context):
         """Show upcoming match day"""
-        matchday = self.get_matchday(idx=0)
-        msg = f"Upcoming matchday: {format_dt(matchday["utcDate"].iloc[0], style = "D")}\n"
+        next_matchday_idx = self.get_index_of_next_matchday()
+        matchday = self.get_matchday(idx=next_matchday_idx)
 
-        for stage in matchday["stage"]:
-            matchday_stage = matchday[matchday["stage"] == stage]
-            for group in matchday_stage["group"]:
-                if group is not None:
-                    msg += f"\n{stage} - {group}:".replace("_", " ")
-                    for idm, match in matchday_stage[
-                        matchday_stage["group"] == group
-                    ].iterrows():
-                        msg += format_match(match)
-                else:
-                    msg += f"\n{stage}:".replace("_", " ")
-                    for idm, match in matchday_stage.iterrows():
-                        msg += format_match(match)
-
-        await ctx.send(msg)
+        await ctx.send(format_matchday(matchday))
 
     ########################
     ### Match prediction ###
@@ -166,6 +153,26 @@ def format_match(match):
 
 def format_match_score(match: pd.Series, goals: dict):
     return f"{match["homeTeam"]} {goals[match["homeTeam"]]}-{goals[match["awayTeam"]]} {match["awayTeam"]}"
+
+
+def format_matchday(matchday):
+    msg = f"Upcoming matchday: {format_dt(matchday["utcDate"].iloc[0], style = "D")}\n"
+
+    for stage in matchday["stage"]:
+        matchday_stage = matchday[matchday["stage"] == stage]
+        for group in matchday_stage["group"]:
+            if group is not None:
+                msg += f"\n{stage} - {group}:".replace("_", " ")
+                for idm, match in matchday_stage[
+                    matchday_stage["group"] == group
+                ].iterrows():
+                    msg += format_match(match)
+            else:
+                msg += f"\n{stage}:".replace("_", " ")
+                for idm, match in matchday_stage.iterrows():
+                    msg += format_match(match)
+
+    return msg
 
 
 async def setup(bot):
