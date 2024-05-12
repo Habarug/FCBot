@@ -202,9 +202,9 @@ def format_match_score(match: pd.Series, goals: dict):
 def format_matchday(matchday):
     msg = f"Upcoming matchday: {format_dt(matchday["utcDate"].iloc[0], style = "D")}\n"
 
-    for stage in matchday["stage"]:
+    for stage in matchday["stage"].unique():
         matchday_stage = matchday[matchday["stage"] == stage]
-        for group in matchday_stage["group"]:
+        for group in matchday_stage["group"].unique():
             if group is not None:
                 msg += f"\n{stage} - {group}:".replace("_", " ")
                 for idm, match in matchday_stage[
