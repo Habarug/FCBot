@@ -84,12 +84,6 @@ class FootballCog(commands.Cog):
 
         await ctx.send(format_matchday(matchday), view=view)
 
-        timed_out = await view.wait()
-
-        if timed_out:
-            await ctx.send("Timed out")
-            return
-
         if view.values[0]:
             await self.display_matchday(ctx, matchday_idx - 1)
         elif view.values[1]:
