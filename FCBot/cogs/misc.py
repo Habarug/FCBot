@@ -16,6 +16,7 @@ class Misc(commands.Cog):
 
     @commands.command()
     @app_commands.default_permissions(administrator=True)
+    @commands.is_owner()
     async def sync_slash_commands(self, ctx: commands.Context):
         """Sync slash commands to discord (USE SPARINGLY)"""
         if ctx.author.guild_permissions.administrator is True:
