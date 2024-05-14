@@ -257,9 +257,7 @@ def format_match(match, predict: dict = None):
     ):  # Display goals for finished or ongoing games. Bold if finished
         homeGoals = f"**{match["homeGoals"]}**"
         awayGoals = f"**{match["awayGoals"]}**"
-    elif (
-        match["status"] == "ONGOING"
-    ):  # TODO: Not sure if this is correct, have to check
+    elif match["status"] == "IN_PLAY":
         homeGoals = match["homeGoals"]
         awayGoals = match["awayGoals"]
     else:  # If not finished or ongoing, don't print score
