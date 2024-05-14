@@ -3,6 +3,7 @@ from datetime import datetime as dt
 
 import discord
 import pandas as pd
+from discord import app_commands
 from discord.ext import commands, tasks
 from discord.utils import format_dt
 from footballData import footballData
@@ -12,10 +13,10 @@ class FootballCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-        self.competition = self.bot.competition
-        self.season = self.bot.season
+        self.competition = self.bot._competition
+        self.season = self.bot._season
 
-        self.setup_FD(self.bot.FD_API_key)
+        self.setup_FD(self.bot._FD_API_key)
 
         self.update_matches.start()
 
@@ -54,6 +55,31 @@ class FootballCog(commands.Cog):
         """Loop to update matches"""
         self.matches = self.FD.get_matches(self.competition, self.season)
         self.matchdays = self.matches["utcDate"].dt.date.unique()
+
+    @commands.hybrid_command(description="Change the current competition")
+    @app_commands.default_permissions(administrator=True)
+    async def changecompetition(self, ctx: commands.Context):
+        """Change the current competition"""
+
+        view = ChangeCompetition(
+            self.competitions_df["name"], self.competitions_df["code"]
+        )
+
+        await ctx.send("Select new competition", view=view)
+        timed_out = await view.wait()
+
+        if timed_out:
+            await ctx.send("You did not select a competition, aborted.")
+            return
+
+        self.competition = view.code
+        self.season = self.FD.get_current_season(self.competition)
+
+        self.update_matches.restart()
+
+        await ctx.send(
+            f"Competition successfully changed to: {self.competition} {self.season}"
+        )
 
     #########################
     ### Display matchdays ###
@@ -185,6 +211,39 @@ class PredictMatch(discord.ui.View):
         self.goals = {}
         self.add_item(GoalDropdown(homeTeam))
         self.add_item(GoalDropdown(awayTeam))
+
+
+######################################
+### Change competition UI elements ###
+######################################
+
+
+class CompetitionDropdown(discord.ui.Select):
+    def __init__(self, names: pd.Series, codes: pd.Series):
+        options = [
+            (discord.SelectOption(label=name, value=code))
+            for name, code in zip(names, codes)
+        ]
+
+        super().__init__(
+            placeholder="Select new competition",
+            min_values=1,
+            max_values=1,
+            options=options,
+        )
+
+    async def callback(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        self.view.code = self.values[0]
+        self.view.stop()
+        return
+
+
+class ChangeCompetition(discord.ui.View):
+    def __init__(self, names: pd.Series, codes: pd.Series):
+        super().__init__(timeout=60)
+        self.code = ""
+        self.add_item(CompetitionDropdown(names=names, codes=codes))
 
 
 #########################

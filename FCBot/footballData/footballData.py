@@ -108,6 +108,23 @@ class FootballData:
 
         return self.matches[competition]
 
+    def get_current_season(self, competition):
+        """Returns start year of the current season of the given competition
+
+        args:
+            competition: Competition (2-3 letter code, i.e. PL, CL, EC)
+        """
+        try:
+            response = requests.get(
+                self.url_base + f"competitions/{competition}",
+                headers=self.header,
+            )
+        except Exception as e:
+            raise e
+        else:
+            data_raw = response.json()
+            return int(data_raw["currentSeason"]["startDate"][0:4])
+
 
 def main():
     with open(

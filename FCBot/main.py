@@ -30,9 +30,11 @@ class Bot(commands.Bot):
         if self.curDir != self.workingdir:
             sys.path.insert(1, self.curDir)
 
-        self.competition = competition
-        self.season = season
-        self.FD_API_key = FD_API_key
+        # Need to set them here so footballCog can retrieve them after being loaded
+        # These may be outdated if they are changed by the user later, use variables in footballCog instead
+        self._competition = competition
+        self._season = season
+        self._FD_API_key = FD_API_key
 
         self.setup_logger()
 
