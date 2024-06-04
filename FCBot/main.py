@@ -63,10 +63,10 @@ class Bot(commands.Bot):
 
 
 def main():
-    with open(os.path.join(os.path.dirname(__file__), "config", "PRIVATE.json5")) as f:
+    with open(os.path.join(os.path.dirname(__file__), "..", "config", "PRIVATE.json5")) as f:
         priv = pyjson5.load(f)
 
-    with open(os.path.join(os.path.dirname(__file__), "config", "PUBLIC.json5")) as f:
+    with open(os.path.join(os.path.dirname(__file__), "..", "config", "PUBLIC.json5")) as f:
         pub = pyjson5.load(f)
 
     bot = Bot(
