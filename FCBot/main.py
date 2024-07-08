@@ -7,7 +7,7 @@ import pyjson5
 from discord.ext import commands
 
 
-class Bot(commands.Bot):
+class FCBot(commands.Bot):
     def __init__(
         self,
         FD_API_key,
@@ -73,7 +73,7 @@ def main():
     ) as f:
         pub = pyjson5.load(f)
 
-    bot = Bot(
+    bot = FCBot(
         FD_API_key=priv["footballData"],
         competition=pub["competition"],
         season=pub["season"],

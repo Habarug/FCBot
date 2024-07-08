@@ -3,7 +3,7 @@ import os
 
 import pyjson5
 
-from .main import Bot
+from .main import FCBot
 
 
 def replit_run():
@@ -13,7 +13,7 @@ def replit_run():
     ) as f:
         pub = pyjson5.load(f)
 
-    bot = Bot(
+    bot = FCBot(
         FD_API_key=os.getenv("FD_API_KEY"),
         competition=pub["competition"],
         season=pub["season"],
