@@ -203,7 +203,7 @@ class FootballCog(commands.Cog):
         # matchtime = dt.strptime(matchtime, "%Y-%m-%d %H:%M:%S%z")
         now = dt.now(timezone.utc)
         if (now - matchtime).total_seconds() > 0:
-            await ctx.send("Too late, the match has already started")
+            await ctx.send("Too late, the match has already started", ephemeral=True)
             return
 
         # Check if submission already submitted for match
@@ -213,7 +213,9 @@ class FootballCog(commands.Cog):
         ]
 
         if len(prev_predict) > 0:
-            await ctx.send("Prediction for this match already submitted")
+            await ctx.send(
+                "Prediction for this match already submitted", ephemeral=True
+            )
             return
 
         # If both checks are passed add prediction.
@@ -235,8 +237,7 @@ class FootballCog(commands.Cog):
             ]
         )
         self.predictions.to_csv(self.predictionsPath, index=False)
-
-        # await ctx.send(format_match(match, predict=view.goals), ephemeral=True)
+        await ctx.send("Prediction submitted", ephemeral=True)
 
 
 ####################################
