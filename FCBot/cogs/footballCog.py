@@ -163,7 +163,11 @@ class FootballCog(commands.Cog):
 
     @commands.hybrid_command()
     async def predict(self, ctx: commands.Context):
-        await self.predict_match(ctx, self.matches.iloc[0])  # Placeholder lol
+        matchday_idx = self.get_index_of_next_matchday()
+        matchday = self.get_matchday(idx=matchday_idx)
+
+        for _, match in matchday.iterrows():
+            await self.predict_match(ctx, match)
 
     async def predict_match(self, ctx: commands.Context, match: pd.Series):
         homeTeam = match["homeTeam"]
