@@ -71,7 +71,14 @@ class FootballCog(commands.Cog):
         # setup_FD makes sure ../../db exist, no need to do it here
         if not os.path.exists(self.predictionsPath):
             self.predictions = pd.DataFrame(
-                columns=["match_ID", "user_ID", "homeGoals", "awayGoals", "points"]
+                columns=[
+                    "match_ID",
+                    "user_ID",
+                    "homeGoals",
+                    "awayGoals",
+                    "finished",
+                    "points",
+                ]
             )
             self.predictions.to_csv(self.predictionsPath, index=False)
         else:
@@ -210,11 +217,26 @@ class FootballCog(commands.Cog):
             return
 
         # If both checks are passed add prediction.
-        self.predictions.loc[len(self.predictions)] = [
-            [match_ID, user_ID, homeGoals, awayGoals, None]
-        ]
+        self.predictions = pd.concat(
+            [
+                self.predictions,
+                pd.DataFrame.from_dict(
+                    [
+                        {
+                            "match_ID": match_ID,
+                            "user_ID": user_ID,
+                            "homeGoals": homeGoals,
+                            "awayGoals": awayGoals,
+                            "finished": 0,
+                            "points": None,
+                        }
+                    ]
+                ),
+            ]
+        )
+        self.predictions.to_csv(self.predictionsPath, index=False)
 
-        await ctx.send(format_match(match, predict=view.goals), ephemeral=True)
+        # await ctx.send(format_match(match, predict=view.goals), ephemeral=True)
 
 
 ####################################
