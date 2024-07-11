@@ -78,10 +78,10 @@ class FootballCog(commands.Cog):
             self.predictions = pd.read_csv(self.predictionsPath)
 
         if not os.path.exists(self.scoresPath):
-            self.predictions = pd.DataFrame(columns=["user_ID", "points"])
-            self.predictions.to_csv(self.scoresPath, index=False)
+            self.scores = pd.DataFrame(columns=["user_ID", "points"])
+            self.scores.to_csv(self.scoresPath, index=False)
         else:
-            self.predictions = pd.read_csv(self.scoresPath)
+            self.scores = pd.read_csv(self.scoresPath)
 
     @commands.hybrid_command(description="Change the current competition")
     @app_commands.default_permissions(administrator=True)
