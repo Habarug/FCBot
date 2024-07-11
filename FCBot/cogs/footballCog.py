@@ -201,8 +201,8 @@ class FootballCog(commands.Cog):
             0
         ]
         # matchtime = dt.strptime(matchtime, "%Y-%m-%d %H:%M:%S%z")
-        now = now = dt.now(timezone.utc)
-        if (now - matchtime).total_seconds() < 0:
+        now = dt.now(timezone.utc)
+        if (now - matchtime).total_seconds() > 0:
             await ctx.send("Too late, the match has already started")
             return
 
