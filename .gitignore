@@ -1,7 +1,7 @@
 *.ipynb
 *__pycache__
 *PRIVATE.json5
-*competitions.csv
+*/db/
 */logs
 .venv
 .DS_Store

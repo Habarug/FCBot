@@ -20,23 +20,23 @@ class FootballCog(commands.Cog):
 
         self.update_matches.start()
 
+        self.setup_competition()
+
     def setup_FD(self, FD_API_key):
         print("Setting up Football Data API access")
         self.FD = footballData.FootballData(FD_API_key)
 
-        if not os.path.exists(os.path.join(self.bot.curDir, "files")):
-            os.mkdir(os.path.join(self.bot.curDir, "files"))
+        if not os.path.exists(os.path.join(self.bot.curDir, "db")):
+            os.mkdir(os.path.join(self.bot.curDir, "db"))
 
-        if not os.path.exists(
-            os.path.join(self.bot.curDir, "files", "competitions.csv")
-        ):
+        if not os.path.exists(os.path.join(self.bot.curDir, "db", "competitions.csv")):
             self.competitions_df = self.FD.get_competitions()
             self.competitions_df.to_csv(
-                os.path.join(self.bot.curDir, "files", "competitions.csv")
+                os.path.join(self.bot.curDir, "db", "competitions.csv")
             )
         else:
             self.competitions_df = pd.read_csv(
-                os.path.join(self.bot.curDir, "files", "competitions.csv")
+                os.path.join(self.bot.curDir, "db", "competitions.csv")
             )
 
         try:
@@ -54,7 +54,33 @@ class FootballCog(commands.Cog):
     async def update_matches(self):
         """Loop to update matches"""
         self.matches = self.FD.get_matches(self.competition, self.season)
+        # Add a unique ID to each match to link predictions with scores
+        # I hope matches come in the same order every time? Otherwise will get messed up hmm.
+        self.matches["match_ID"] = [
+            f"{self.competition}_{self.season}_{str(i).zfill(3)}"
+            for i in range(len(self.matches))
+        ]
+        self.matches.to_csv(os.path.join(self.bot.curDir, "db", "matches.csv"))
+
         self.matchdays = self.matches["utcDate"].dt.date.unique()
+
+    def setup_competition(self):
+        self.predictionsPath = os.path.join(self.bot.curDir, "db", "predictions.csv")
+        self.scoresPath = os.path.join(self.bot.curDir, "db", "scores.csv")
+        # setup_FD makes sure ../../db exist, no need to do it here
+        if not os.path.exists(self.predictionsPath):
+            self.predictions = pd.DataFrame(
+                columns=["match_ID", "user_ID", "homeTeam", "awayTeam", "points"]
+            )
+            self.predictions.to_csv(self.predictionsPath, index=False)
+        else:
+            self.predictions = pd.read_csv(self.predictionsPath)
+
+        if not os.path.exists(self.scoresPath):
+            self.predictions = pd.DataFrame(columns=["user_ID", "points"])
+            self.predictions.to_csv(self.scoresPath, index=False)
+        else:
+            self.predictions = pd.read_csv(self.scoresPath)
 
     @commands.hybrid_command(description="Change the current competition")
     @app_commands.default_permissions(administrator=True)
@@ -146,6 +172,7 @@ class FootballCog(commands.Cog):
             await ctx.send("You did not enter a prediction", ephemeral=True)
             return
 
+        # await self.submit_prediction(match, view.goals[homeTeam], view.goals[awayTeam], ctx.author.id)
         await ctx.send(format_match(match, predict=view.goals), ephemeral=True)
 
 
