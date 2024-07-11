@@ -1,5 +1,6 @@
 import os
 from datetime import datetime as dt
+from datetime import timezone
 
 import discord
 import pandas as pd
@@ -70,7 +71,7 @@ class FootballCog(commands.Cog):
         # setup_FD makes sure ../../db exist, no need to do it here
         if not os.path.exists(self.predictionsPath):
             self.predictions = pd.DataFrame(
-                columns=["match_ID", "user_ID", "homeTeam", "awayTeam", "points"]
+                columns=["match_ID", "user_ID", "homeGoals", "awayGoals", "points"]
             )
             self.predictions.to_csv(self.predictionsPath, index=False)
         else:
@@ -172,7 +173,47 @@ class FootballCog(commands.Cog):
             await ctx.send("You did not enter a prediction", ephemeral=True)
             return
 
-        # await self.submit_prediction(match, view.goals[homeTeam], view.goals[awayTeam], ctx.author.id)
+        await self.submit_prediction(
+            ctx,
+            match["match_ID"],
+            ctx.author.id,
+            view.goals[homeTeam],
+            view.goals[awayTeam],
+        )
+
+    async def submit_prediction(
+        self,
+        ctx: commands.Context,
+        match_ID: str,
+        user_ID: str,
+        homeGoals: int,
+        awayGoals: int,
+    ):
+        # Check that match has not started
+        matchtime = self.matches[self.matches["match_ID"] == match_ID]["utcDate"].iloc[
+            0
+        ]
+        # matchtime = dt.strptime(matchtime, "%Y-%m-%d %H:%M:%S%z")
+        now = now = dt.now(timezone.utc)
+        if (now - matchtime).total_seconds() < 0:
+            await ctx.send("Too late, the match has already started")
+            return
+
+        # Check if submission already submitted for match
+        prev_predict = self.predictions[
+            (self.predictions["match_ID"] == match_ID)
+            & (self.predictions["user_ID"] == user_ID)
+        ]
+
+        if len(prev_predict) > 0:
+            await ctx.send("Prediction for this match already submitted")
+            return
+
+        # If both checks are passed add prediction.
+        self.predictions.loc[len(self.predictions)] = [
+            [match_ID, user_ID, homeGoals, awayGoals, None]
+        ]
+
         await ctx.send(format_match(match, predict=view.goals), ephemeral=True)
 
 
