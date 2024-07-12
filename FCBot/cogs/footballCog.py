@@ -19,7 +19,7 @@ class FootballCog(commands.Cog):
 
         self.setup_FD(self.bot._FD_API_key)
 
-        self.update_matches.start()
+        self.update_matches_loop.start()
 
         self.setup_competition()
 
@@ -52,9 +52,15 @@ class FootballCog(commands.Cog):
             )
 
     @tasks.loop(minutes=60)  # update matches every X minute
-    async def update_matches(self):
-        """Loop to update matches"""
+    async def update_matches_loop(self):
+        self.update_matches()
+        self.update_prediction_scores()
+        self.update_total_scores()
+
+    def update_matches(self):
+        """Update matches"""
         self.matches = self.FD.get_matches(self.competition, self.season)
+
         # Add a unique ID to each match to link predictions with scores
         # I hope matches come in the same order every time? Otherwise will get messed up hmm.
         self.matches["match_ID"] = [
@@ -76,7 +82,6 @@ class FootballCog(commands.Cog):
                     "user_ID",
                     "homeGoals",
                     "awayGoals",
-                    "finished",
                     "points",
                 ]
             )
@@ -233,7 +238,6 @@ class FootballCog(commands.Cog):
                             "user_ID": user_ID,
                             "homeGoals": homeGoals,
                             "awayGoals": awayGoals,
-                            "finished": 0,
                             "points": None,
                         }
                     ]
@@ -242,6 +246,42 @@ class FootballCog(commands.Cog):
         )
         self.predictions.to_csv(self.predictionsPath, index=False)
         await ctx.send("Prediction submitted", ephemeral=True)
+
+    #####################
+    ### Update scores ###
+    #####################
+
+    def score_prediction(
+        self, match_ID: str, predictHome: int, predictAway: int
+    ) -> int:
+        match = self.matches[self.matches["match_ID" == match_ID]]
+
+        if len(match) > 0:
+            raise ValueError(f"Match_ID {match_ID} not unique")
+
+        if match["status"].iloc[0] == "FINISHED":
+            return 0  # Scoring logic to be implemented
+
+    def update_prediction_scores(self):
+        for user_ID in self.predictions["user_ID"].unique():
+            score = 0
+            for idp, prediction in self.predictions[
+                self.predictions["user_ID"] == user_ID
+            ].iterrows():
+                points = self.score_prediction(
+                    match_ID=prediction["match_ID"],
+                    predictHome=prediction["homeGoals"],
+                    predictAway=prediction["awayGoals"],
+                )
+                if prediction["points"] != points:
+                    raise ValueError("Points calculation inconsistent")
+
+                self.predictions.iloc[idp]["points"] = points
+
+        self.predictions.to_csv(self.predictionsPath, index=False)
+
+    def update_total_scores(self):
+        pass  # To be implemented
 
 
 ####################################
