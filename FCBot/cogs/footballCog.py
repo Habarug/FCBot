@@ -59,6 +59,10 @@ class FootballCog(commands.Cog):
 
     def update_matches(self):
         """Update matches"""
+
+        self.matchesPath = os.path.join(
+            self.bot.curDir, "db", f"{self.comp_ID}_matches.csv"
+        )
         self.matches = self.FD.get_matches(self.competition, self.season)
 
         # Add a unique ID to each match to link predictions with scores
@@ -67,13 +71,17 @@ class FootballCog(commands.Cog):
             f"{self.competition}_{self.season}_{str(i).zfill(3)}"
             for i in range(len(self.matches))
         ]
-        self.matches.to_csv(os.path.join(self.bot.curDir, "db", "matches.csv"))
+        self.matches.to_csv(self.matchesPath)
 
         self.matchdays = self.matches["utcDate"].dt.date.unique()
 
     def setup_competition(self):
-        self.predictionsPath = os.path.join(self.bot.curDir, "db", "predictions.csv")
-        self.scoresPath = os.path.join(self.bot.curDir, "db", "scores.csv")
+        self.predictionsPath = os.path.join(
+            self.bot.curDir, "db", f"{self.comp_ID}_predictions.csv"
+        )
+        self.scoresPath = os.path.join(
+            self.bot.curDir, "db", f"{self.comp_ID}_scores.csv"
+        )
         # setup_FD makes sure ../../db exist, no need to do it here
         if not os.path.exists(self.predictionsPath):
             self.predictions = pd.DataFrame(
@@ -282,6 +290,15 @@ class FootballCog(commands.Cog):
 
     def update_total_scores(self):
         pass  # To be implemented
+
+    #################
+    ### Utilities ###
+    #################
+
+    @property
+    def comp_ID(self):
+        """Returns a comp_season str"""
+        return f"{self.competition}_{self.season}"
 
 
 ####################################
