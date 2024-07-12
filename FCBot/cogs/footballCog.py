@@ -114,7 +114,7 @@ class FootballCog(commands.Cog):
         self.competition = view.code
         self.season = self.FD.get_current_season(self.competition)
 
-        self.update_matches.restart()
+        self.update_matches_loop.restart()
 
         await ctx.send(
             f"Competition successfully changed to: {self.competition} {self.season}"
