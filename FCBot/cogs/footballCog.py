@@ -267,8 +267,26 @@ class FootballCog(commands.Cog):
         if len(match) > 0:
             raise ValueError(f"Match_ID {match_ID} not unique")
 
-        if match["status"].iloc[0] == "FINISHED":
-            return 0  # Scoring logic to be implemented
+        match = match.iloc[0]  # Series to object, so .iloc[0] is not needed every time
+        if match["status"] == "FINISHED":
+            # Consider implementing multipliers for different stages later
+            home = match["homeGoals"]  # for convenience
+            away = match["awayGoals"]
+
+            # 3 points for exact match
+            if (home == predictHome) and (away == predictAway):
+                return 3
+
+            # 1 point for correct outcome, is there a cleaner way to do this?
+            if (
+                ((home > away) and (predictHome > predictAway))
+                or ((home < away) and (predictHome < predictAway))
+                or ((home == away) and (predictHome == predictAway))
+            ):
+                return 1
+
+            # otherwise return 0
+            return 0
 
     def update_prediction_scores(self):
         for user_ID in self.predictions["user_ID"].unique():
